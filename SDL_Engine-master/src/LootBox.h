@@ -5,10 +5,10 @@
 #include "DisplayObject.h"
 #include "Util.h"
 
-class Target final : public DisplayObject {
+class LootBox final : public DisplayObject {
 public:
-	Target();
-	~Target();
+	LootBox();
+	~LootBox();
 
 	// Inherited via GameObject
 	virtual void draw() override;
@@ -36,12 +36,12 @@ public:
 	void setVelocityX(float velocityX);
 	float getVelocityY();
 	void setVelocityY(float velocityY);
-	
+
 	// Initial Position
 	glm::vec2 getInitialPosition();
 	void setInitialPosition(glm::vec2 initPos);
 
-	
+
 	// Resetting purposes
 	void resetElapsedTime();
 
@@ -56,10 +56,8 @@ private:
 	float m_velocity = 0.0f;
 	float m_velocityX = 0.0f;
 	float m_velocityY = 0.0f;
+	float mass = 0.0f;
 
-	bool m_isGravityEnabled = false;
-	bool m_isThrown = false;
-	
 	float deltaTime = 1.0f / 30.0f;
 	float elapsedTime = 1.0f / 30.0f;
 

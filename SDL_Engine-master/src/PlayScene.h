@@ -71,6 +71,10 @@ private:
 	float m_PPM = 5.0f; // Pixels per meter scale
 	float m_Angle = 0.0f; // Launch Angle
 	float m_velocity = 0.0f; // initial velocity
+	float m_acceleration = 0.0f; //
+
+	float netForce = 0.0f;
+	float frictionForce = 0.0f;
 
 	// set ramp params
 	float xRamp = 0.0f;
