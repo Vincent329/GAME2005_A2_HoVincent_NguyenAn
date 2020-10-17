@@ -48,7 +48,7 @@ void StartScene::start()
 	const SDL_Color blue = { 0, 0, 255, 255 };
 	const SDL_Color black = { 0, 0, 0, 255 };
 
-	m_pStartLabel = new Label("ASSIGNMENT 1", "Consolas", 80, blue, glm::vec2(400.0f, 40.0f));
+	m_pStartLabel = new Label("ASSIGNMENT 2", "Consolas", 80, blue, glm::vec2(400.0f, 40.0f));
 	m_pStartLabel->setParent(this);
 	addChild(m_pStartLabel);
 
@@ -63,6 +63,7 @@ void StartScene::start()
 	m_An = new Label("An Nguyen - 101166265", "Consolas", 20, black, glm::vec2(400.0f, 230.0f));
 	m_An->setParent(this);
 	addChild(m_An);
+
 	//m_pShip = new Ship();
 	//m_pShip->getTransform()->position = glm::vec2(400.0f, 300.0f); 
 	//addChild(m_pShip); 

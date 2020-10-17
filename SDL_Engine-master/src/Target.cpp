@@ -4,7 +4,7 @@
 
 Target::Target()
 {
-	TextureManager::Instance()->load("../Assets/textures/detonator.png","detonator");
+	TextureManager::Instance()->load("../Assets/textures/circle.png","detonator");
 
 	const auto size = TextureManager::Instance()->getTextureSize("detonator");
 	setWidth(size.x);

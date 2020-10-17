@@ -27,7 +27,7 @@ void PlayScene::draw()
 		GUI_Function();
 	}
 
-	// Scale factor 1represented as white line on bottom left
+	// Scale factor 1represented as white line on bottom left, need for Assignment 2
 	m_PPMdisplay->setText("PPM: " + std::to_string(m_PPM));
 	Util::DrawLine(glm::vec2(50.0f, 550.0f), glm::vec2(50.0f + m_PPM, 550.0f), glm::vec4(1.0f));
 	Util::DrawLine(glm::vec2(50.0f, 551.0f), glm::vec2(50.0f + m_PPM, 551.0f), glm::vec4(1.0f));
@@ -36,27 +36,10 @@ void PlayScene::draw()
 	Util::DrawLine(glm::vec2(50.0f, 554.0f), glm::vec2(50.0f + m_PPM, 554.0f), glm::vec4(1.0f));
 	Util::DrawLine(glm::vec2(50.0f, 555.0f), glm::vec2(50.0f + m_PPM, 555.0f), glm::vec4(1.0f));
 
-	// Drawing a vector line to Simulate aiming vector
-	if (!isMoving)
-	{
-		Util::DrawLine(glm::vec2(m_pBall->getTransform()->position),
-			glm::vec2(m_pBall->getTransform()->position.x + 30 * cos(glm::radians(m_Angle)),
-				m_pBall->getTransform()->position.y + 30 * -sin(glm::radians(m_Angle))),
-			glm::vec4(1.0f));
-		Util::DrawLine(glm::vec2(m_pBall->getTransform()->position.x, m_pBall->getTransform()->position.y + 1),
-			glm::vec2(m_pBall->getTransform()->position.x + 30 * cos(glm::radians(m_Angle)),
-				m_pBall->getTransform()->position.y + 30 * -sin(glm::radians(m_Angle))),
-			glm::vec4(1.0f));
-		Util::DrawLine(glm::vec2(m_pBall->getTransform()->position.x, m_pBall->getTransform()->position.y + 2),
-			glm::vec2(m_pBall->getTransform()->position.x + 30 * cos(glm::radians(m_Angle)),
-				m_pBall->getTransform()->position.y + 30 * -sin(glm::radians(m_Angle))),
-			glm::vec4(1.0f));
-	}
-
-	// Draw the ramp
-	Util::DrawLine(glm::vec2(400.0f, 400.0f), glm::vec2(400.0f + xRamp, 400.0f), glm::vec4(1.0f));
-	Util::DrawLine(glm::vec2(400.0f, 400.0f), glm::vec2(400.0f, 400.0f - yRamp), glm::vec4(1.0f));
-	Util::DrawLine(glm::vec2(400.0f + xRamp, 400.0f), glm::vec2(400.0f, 400.0f - yRamp), glm::vec4(1.0f));
+	// Draw the ramp FOR ASSIGNMENT 2
+	Util::DrawLine(glm::vec2(150.0f, 400.0f), glm::vec2(150.0f + xRamp, 400.0f), glm::vec4(1.0f));
+	Util::DrawLine(glm::vec2(150.0f, 400.0f), glm::vec2(150.0f, 400.0f - yRamp), glm::vec4(1.0f));
+	Util::DrawLine(glm::vec2(150.0f + xRamp, 400.0f), glm::vec2(150.0F, 400.0f - yRamp), glm::vec4(1.0f));
 
 
 	SDL_SetRenderDrawColor(Renderer::Instance()->getRenderer(), 255, 255, 255, 255);
@@ -162,7 +145,7 @@ void PlayScene::start()
 	const SDL_Color white = { 255, 255, 255, 255 };
 
 	// Set GUI Title
-	m_guiTitle = "Play Scene";	
+	m_guiTitle = "Physics Simulator";	
 
 	// Player Sprite
 	m_pPlayer = new Player();
@@ -182,11 +165,6 @@ void PlayScene::start()
 	m_pEnemy->getTransform()->position = glm::vec2(700.f, m_pPlayer->getTransform()->position.y);
 	addChild(m_pEnemy);
 
-	// import reticle
-	m_pReticle = new Reticle();
-	m_pReticle->getTransform()->position.x = reticleDistance(m_velocity, m_Angle);
-	addChild(m_pReticle);
-
 	/* Instructions Label */
 	m_pInstructionsLabel = new Label("Press the backtick (`) character to toggle Debug View", "Consolas", 20, white);
 	m_pInstructionsLabel->getTransform()->position = glm::vec2(Config::SCREEN_WIDTH * 0.5f, 520.0f);
@@ -205,48 +183,6 @@ void PlayScene::resetValues()
 	m_Angle = 0.0f;
 	m_velocity = 0.0f;
 }
-
-float PlayScene::reticleDistance(float velocity, float angle)
-{
-	// R = (v^2)sin(2(theta))/g
-	// remember to multiply by the scale function
-	float range = ((((velocity * m_PPM) * (velocity*m_PPM)) * sin(glm::radians(2 * angle))) / (m_gravityFactor*m_PPM));
-	std::cout << "Range: " << range << std::endl;
-	return m_pBall->getTransform()->position.x + range;
-}
-
-float PlayScene::angleChange(float distance, float velocity)
-{
-	// theta = asin((g*deltaDistance)/velocity^2)/2
-
-	float calculation = ((m_gravityFactor * m_PPM) * distance) / ((velocity * m_PPM) * (velocity * m_PPM));
-	if (calculation < -1 || calculation > 1)
-	{
-		return 45.0f;
-	}
-	else {
-		float angleInRads = asin(calculation) / 2.0f;
-		std::cout << "Angle in Rads: " << angleInRads << std::endl;
-		return glm::degrees(angleInRads);
-	}
-}
-
-// velocity lock
-// passed in delta distance, as well as the angle of kick, adjust velocity accordingly
-float PlayScene::velocityAdjust(float distance, float angle)
-{
-	// v = square root (g*d/sin2(theta))
-	// divide by PPM because velocity will be multiplied by that when move calls
-	return sqrt((((m_gravityFactor*m_PPM)*distance))/sin(glm::radians(2*angle)))/m_PPM;
-}
-
-float PlayScene::maxDistanceLock(float distance)
-{
-	// since this will just use the maximum distance (sin(2(45)) = 1
-	// v = sqrt(g*d)
-	return sqrt(((m_gravityFactor * m_PPM) * distance)) / m_PPM;
-}
-
 
 void PlayScene::GUI_Function()
 {
@@ -306,15 +242,15 @@ void PlayScene::GUI_Function()
 		m_pBall->setAngle(m_Angle);
 		m_pBall->setInitialPosition(m_pBall->getTransform()->position);
 		m_pBall->resetElapsedTime();
-		m_pReticle->getTransform()->position.x = reticleDistance(m_velocity, m_Angle);
 	}
+
+	// ----------------------- PARAMETER CHANGES -----------------------
 
 	// Pixels per meter scale
 	if (ImGui::SliderFloat("Pixels Per Meter", &m_PPM, 0.1f, 30.0f, "%.1f"))
 	{
 		m_pBall->setPixelsPerMeter(m_PPM);
 		std::cout << "Pixels Per Meter: " << m_pBall->getPixelsPerMeter() << std::endl;
-		m_pReticle->getTransform()->position.x = reticleDistance(m_velocity, m_Angle);
 	}
 	
 	// Modifiable Gravity Coefficient
@@ -322,7 +258,6 @@ void PlayScene::GUI_Function()
 	{
 		m_pBall->setGravityFactor(m_gravityFactor);
 		std::cout << "Gravity Factor: " << m_pBall->getGravityFactor() << std::endl;
-		m_pReticle->getTransform()->position.x = reticleDistance(m_velocity, m_Angle);
 	}
 
 	// Angle for the ball to be kicked at
@@ -330,7 +265,6 @@ void PlayScene::GUI_Function()
 	{
 		m_pBall->setAngle(m_Angle);
 		std::cout << "Angle value: " << m_pBall->getAngle() << std::endl;
-		m_pReticle->getTransform()->position.x = reticleDistance(m_velocity, m_Angle);
 	}
 
 	// Change for high angle and low angle launch
@@ -346,44 +280,13 @@ void PlayScene::GUI_Function()
 	{
 		m_pBall->setVelocity(m_velocity);
 		std::cout << "Initial Velocity: " << m_pBall->getVelocity() << std::endl;
-		m_pReticle->getTransform()->position.x = reticleDistance(m_velocity, m_Angle);
-	}
-	
-	// 3 lock functions
-	// Target lock (Angle set to 45, and adjust velocity accordingly given delta distance)
-	// Velocity Lock (given delta distance abd angle, adjust velocity accordingly)
-	// Angle Lock (given delta distance and velocity, adjust angle accordingly, otherwise default to 45)
-	if (ImGui::Button("Target Lock"))
-	{
-		deltaDistance = m_pEnemy->getTransform()->position.x - m_pBall->getTransform()->position.x;
-		m_Angle = 45.0f;
-		m_velocity = maxDistanceLock(deltaDistance);
-		m_pBall->setVelocity(m_velocity);
-		m_pBall->setAngle(m_Angle);
-		m_pReticle->getTransform()->position.x = reticleDistance(m_velocity, m_Angle);
-		std::cout << "New Velocity: " << m_pBall->getVelocity() << std::endl;
 	}
 
-	ImGui::SameLine();
-	if (ImGui::Button("Velocity Lock"))
-	{
-		deltaDistance = m_pEnemy->getTransform()->position.x - m_pBall->getTransform()->position.x;
-		std::cout << "Distance between ball and target: " << deltaDistance << std::endl;
-		m_velocity = velocityAdjust(deltaDistance, m_Angle);
-		m_pBall->setVelocity(m_velocity);
-		m_pReticle->getTransform()->position.x = reticleDistance(m_velocity, m_Angle);
-		std::cout << "New Velocity: " << m_pBall->getVelocity() << std::endl;
+	// Lab purposes
+	if (ImGui::SliderFloat("Ramp Length", &xRamp, 0, 800)) {
 	}
 
-	ImGui::SameLine();
-	if (ImGui::Button("Angle Lock"))
-	{
-		deltaDistance = m_pEnemy->getTransform()->position.x - m_pBall->getTransform()->position.x;
-		std::cout << "Distance between ball and target: " << deltaDistance << std::endl;
-		m_Angle = angleChange(deltaDistance, m_velocity);
-		m_pBall->setAngle(m_Angle);
-		m_pReticle->getTransform()->position.x = reticleDistance(m_velocity, m_Angle);
-		std::cout << "New Angle: " << m_pBall->getAngle() << std::endl;
+	if (ImGui::SliderFloat("Ramp Height", &yRamp, 0, 600)) {
 	}
 	
 	ImGui::Separator();
@@ -400,7 +303,6 @@ void PlayScene::GUI_Function()
 		m_pBall->getTransform()->position = glm::vec2(xPlayerPos+m_pBall->getWidth(), 400);
 		m_pBall->setInitialPosition(m_pBall->getTransform()->position);
 		std::cout << "Initial Position = X: " << m_pBall->getTransform()->position.x << " Y: " << m_pBall->getTransform()->position.y << std::endl;
-		m_pReticle->getTransform()->position.x = reticleDistance(m_velocity, m_Angle);
 
 		// check so that the bomb does not pass the enemy position
 		if (m_pBall->getTransform()->position.x >= xEnemyPos)
@@ -423,12 +325,7 @@ void PlayScene::GUI_Function()
 	}
 
 	
-	// Lab purposes
-	if (ImGui::SliderFloat("Ramp Length", &xRamp, 0, 300)) {
-	}
-
-	if (ImGui::SliderFloat("Ramp Height", &yRamp, 0, 300)) {
-	}
+	
 
 
 	ImGui::End();

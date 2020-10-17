@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #ifndef __PLAY_SCENE__
 #define __PLAY_SCENE__
 
@@ -8,7 +8,6 @@
 #include "Enemy.h"
 #include "Button.h"
 #include "Target.h"
-#include "Reticle.h"
 #include "Label.h"
 #include "Util.h"
 
@@ -31,20 +30,8 @@ public:
 	//float getPixelserMeter();
 	//void setPixelsPerMeter(float ppm);
 
+	// this will toggle the physics simulation
 	bool isMoving = false;
-
-	// Horizontal Range for Reticle aiming;
-	// Distance
-	float reticleDistance(float velocity, float angle);
-
-	// Angle
-	float angleChange(float distance, float velocity);
-
-	// Velocity
-	float velocityAdjust(float distance, float angle);
-
-	// Target Lock
-	float maxDistanceLock(float distance);
 
 private:
 	// IMGUI Function
@@ -53,7 +40,6 @@ private:
 	
 	glm::vec2 m_mousePosition;
 
-	Reticle* m_pReticle;
 	Enemy* m_pEnemy; // for testing purposes
 	Plane* m_pPlaneSprite;
 	Player* m_pPlayer;
@@ -61,24 +47,24 @@ private:
 	bool m_playerFacingRight;
 
 	// UI Items
-	Button* m_pBackButton;
-	Button* m_pNextButton;
 	Label* m_pInstructionsLabel;
 	Label* m_PPMdisplay;
 
-	// Physics variables to pass into the Target/Detonator
-	float m_gravityFactor = 9.8f; // earth gravity, positive because going downwards is positive
+	// Physics variables to pass into the Physics simulator
+	float m_gravityFactor = 9.8f; // earth gravity, positive because going downwards is positive, can be modifiable
 	float m_PPM = 5.0f; // Pixels per meter scale
-	float m_Angle = 0.0f; // Launch Angle
-	float m_velocity = 0.0f; // initial velocity
+
+	float m_Angle = 0.0f; // Angle of the ramp as designated by tan(theta) = opposite/adjacent (yRamp/xRamp)
+	float m_velocity = 0.0f; // initial velocity of the ball
 	float m_acceleration = 0.0f; //
 
 	float netForce = 0.0f;
-	float frictionForce = 0.0f;
+	glm::vec2 staticFrictionForce; // the amount of force acting upon the object so that it doesn't move
+	glm::vec2 kineticFrictionForce; // the amount of friction acting upon the object as it is moving along the ramp
 
 	// set ramp params
-	float xRamp = 0.0f;
-	float yRamp = 0.0f;
+	float xRamp = 400.0f;
+	float yRamp = 200.0f;
 
 	// distance between bomb and the target
 	float deltaDistance = 0;
