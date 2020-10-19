@@ -16,8 +16,7 @@ public:
 	virtual void clean() override;
 
 
-	glm::vec2 throwSpeed;
-	glm::vec2 throwPosition;
+	
 	void m_move();
 
 	// Getter and Setter for Physics Factors

@@ -8,6 +8,7 @@
 #include "Enemy.h"
 #include "Button.h"
 #include "Target.h"
+#include "LootBox.h"
 #include "Label.h"
 #include "Util.h"
 
@@ -30,8 +31,14 @@ public:
 	//float getPixelserMeter();
 	//void setPixelsPerMeter(float ppm);
 
+	// Calculate Physics functions
+	float calculateAngle(float x, float y); // takes in xramp and yramp and gets angle through atan(x/y);
+	float calculateHeight(float angle, float x); // if player wants to change angle specifically, 
+											     // then call this function where y = x * tan(angle)
+
+
 	// this will toggle the physics simulation
-	bool isMoving = false;
+	bool isEnabled = false;
 
 private:
 	// IMGUI Function
@@ -40,6 +47,7 @@ private:
 	
 	glm::vec2 m_mousePosition;
 
+	LootBox* m_pLootbox; // the sprite we're going to add in
 	Enemy* m_pEnemy; // for testing purposes
 	Plane* m_pPlaneSprite;
 	Player* m_pPlayer;
@@ -51,20 +59,22 @@ private:
 	Label* m_PPMdisplay;
 
 	// Physics variables to pass into the Physics simulator
+	float mass = 0.0f;
 	float m_gravityFactor = 9.8f; // earth gravity, positive because going downwards is positive, can be modifiable
 	float m_PPM = 5.0f; // Pixels per meter scale
 
-	float m_Angle = 0.0f; // Angle of the ramp as designated by tan(theta) = opposite/adjacent (yRamp/xRamp)
 	float m_velocity = 0.0f; // initial velocity of the ball
 	float m_acceleration = 0.0f; //
 
 	float netForce = 0.0f;
-	glm::vec2 staticFrictionForce; // the amount of force acting upon the object so that it doesn't move
 	glm::vec2 kineticFrictionForce; // the amount of friction acting upon the object as it is moving along the ramp
 
 	// set ramp params
 	float xRamp = 400.0f;
 	float yRamp = 200.0f;
+	float m_Angle = 0.0f; // Angle of the ramp as designated by tan(theta) = opposite/adjacent (yRamp/xRamp)4
+					      // can also change to user specifics
+
 
 	// distance between bomb and the target
 	float deltaDistance = 0;

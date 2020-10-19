@@ -2,7 +2,7 @@
 
 LootBox::LootBox()
 {
-	TextureManager::Instance()->load("../Assets/textures/circle.png", "lootbox");
+	TextureManager::Instance()->load("../Assets/textures/megaman-idle-0.png", "lootbox");
 
 	const auto size = TextureManager::Instance()->getTextureSize("lootbox");
 	setWidth(size.x);
@@ -38,43 +38,74 @@ void LootBox::clean()
 void LootBox::m_move()
 {
 	std::cout << "Calling Move" << std::endl;
+	std::cout << "Enabled working? " << m_isEnabled << std::endl;
 	if (!m_isEnabled)
 	{	
 		
 		// Make sure that the box doesn't move at all when you're going down
 		getRigidBody()->velocity = glm::vec2(0.0f, 0.0f) * m_PPM;
 		getRigidBody()->acceleration = glm::vec2(0.0f, 0.0F) * m_PPM;
+
+		std::cout << "velocity X: " << getRigidBody()->velocity.x << std::endl;
+		std::cout << "velocity Y: " << getRigidBody()->velocity.y << std::endl;
+
+		std::cout << "Acceleration X: " << getRigidBody()->acceleration.x << std::endl;
+		std::cout << "Acceleration Y: " << getRigidBody()->acceleration.y << std::endl;
 	}
 	else {
 		// implement formulas here
+		
+		// the ramp will have a frictionless surface
 
-		// if Static Friction is greater than mg sin (angle)
-		// do not move
-		// Fs = (mS)*(mass * gravityFactor * cos(angle)
-		// Fparallel = mgsin(theta), the force going down
+		// So the formula needed here for acceleration will be
+		// a = g * sin(theta)
+		acceleration = m_gravityFactor * sin(m_Angle);
+		m_acceleration = glm::vec2(acceleration * cos(m_Angle), acceleration * sin(m_Angle));
+		getRigidBody()->acceleration = m_acceleration;
 
-		// if  Fs > Fparallel
-		// object does not move
+		std::cout << "Acceleration X: " << getRigidBody()->acceleration.x << std::endl;
+		std::cout << "Acceleration Y: " << getRigidBody()->acceleration.y << std::endl;
 
-		// else if Fparallel >= Fs
+		// velocity += acceleration * deltaTime * m_PPM
+		getRigidBody()->velocity += getRigidBody()->acceleration * deltaTime * m_PPM;
+		
+		// Pf += velocity * dt (explanation)
+		getTransform()->position += getRigidBody()->velocity * deltaTime;
 
-		// Apply the isolated acceleration so that 
-		// F parallel = mass*gravity*sin(angle) - (kinetic coefficient)*mass*gravity*cos(angle)
-		// MAKE SURE THAT KINETIC FRICTION DOES NOT SURPASS STATIC FRICTION
-			// SET THAT IN THE PLAYSCENE.CPP
-		// isolate mass to get the acceleration
-		// Acceleration = gravity * sin(angle) - (kinetic co
+		// ---------- flat surface ------------
+		// if the ball reached a certain height
+		// could trigger on bool
+		// velocity will change from going down the ramp along a flat surface with friction
+		// accelaration wilw go the other way because the only net force will be the force of friction
+		// acceleration = - (mk) * m_gravityFactor;
+		// velocity += acceleration * deltaTime * m_PPM
+
+		// Pf += velocity * dt (explanation)
+		// getTransform()->position += getRigidbody()->velocity * deltaTime
+
+		
 	}
 }
 
 float LootBox::getGravityFactor()
 {
-	return 0.0f;
+	return m_gravityFactor;
 }
 
 void LootBox::setGravityFactor(float gFactor)
 {
 	m_gravityFactor = gFactor;
+	gravityVector = glm::vec2(0.0f, m_gravityFactor);
+}
+
+float LootBox::getMass()
+{
+	return m_Mass;
+}
+
+void LootBox::setMass(float mass)
+{
+	m_Mass = mass;
 }
 
 float LootBox::getPixelsPerMeter()
@@ -87,7 +118,7 @@ void LootBox::setPixelsPerMeter(float ppm)
 	m_PPM = ppm;
 }
 
-void LootBox::setIsThrown(bool check)
+void LootBox::setIsEnabled(bool check)
 {
 	m_isEnabled = check;
 }
@@ -102,35 +133,16 @@ void LootBox::setAngle(float angle)
 	m_Angle = angle;
 }
 
-//float LootBox::getVelocity()
-//{
-//	return m_velocity;
-//}
-//
-//void LootBox::setVelocity(float velocity)
-//{
-//	m_velocity = velocity;
-//}
-//
-//float LootBox::getVelocityX()
-//{
-//	return m_velocityX;
-//}
-//
-//void LootBox::setVelocityX(float velocityX)
-//{
-//	m_velocityX = velocityX;
-//}
-//
-//float LootBox::getVelocityY()
-//{
-//	return m_velocityY;
-//}
-//
-//void LootBox::setVelocityY(float velocityY)
-//{
-//	m_velocityY = velocityY;
-//}
+glm::vec2 LootBox::getVelocity()
+{
+	return m_velocity;
+}
+
+void LootBox::setVelocity(glm::vec2 velocity)
+{
+	m_velocity = velocity;
+}
+
 
 glm::vec2 LootBox::getInitialPosition()
 {

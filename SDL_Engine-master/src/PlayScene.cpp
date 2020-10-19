@@ -47,10 +47,10 @@ void PlayScene::draw()
 
 void PlayScene::update()
 {
-	if (isMoving)
-	{
-		m_pBall->m_move();
-	}	
+	// once Physics enabled is pressed, the lootbox function will activate
+	
+	m_pLootbox->m_move();
+
 	updateDisplayList();
 }
 
@@ -137,10 +137,9 @@ void PlayScene::handleEvents()
 	}
 }
 
-
-
 void PlayScene::start()
 {
+	// set the background
 	TextureManager::Instance()->load("../Assets/textures/Background.png", "background");
 	const SDL_Color white = { 255, 255, 255, 255 };
 
@@ -152,18 +151,30 @@ void PlayScene::start()
 	m_pPlayer->getTransform()->position = glm::vec2(100.0f, 400.0f);
 	addChild(m_pPlayer);
 	m_playerFacingRight = true;
+	
+	// Box Sprite
+	m_pLootbox = new LootBox();
+	m_pLootbox->getTransform()->position = glm::vec2(150.0f, yRamp);
+	m_pLootbox->getTransform()->rotation = glm::vec2(0.0f, 90.0f);
 
-	// Ball sprite
-	m_pBall = new Target();
-	m_pBall->getTransform()->position = m_pPlayer->getTransform()->position;
-	m_pBall->getTransform()->position.x += m_pBall->getWidth();
-	m_pBall->setInitialPosition(m_pBall->getTransform()->position);
-	addChild(m_pBall);
+	m_Angle = calculateAngle(xRamp, yRamp);
+	m_pLootbox->setAngle(m_Angle);
+	m_pLootbox->setGravityFactor(m_gravityFactor);
+	m_pLootbox->setPixelsPerMeter(m_PPM);
+	addChild(m_pLootbox);
 
-	// ship sprite for testing purposes
-	m_pEnemy = new Enemy();
-	m_pEnemy->getTransform()->position = glm::vec2(700.f, m_pPlayer->getTransform()->position.y);
-	addChild(m_pEnemy);
+	std::cout << "Gravity Factor: " << m_pLootbox->getGravityFactor() << std::endl;
+	std::cout << "Mass: " << m_pLootbox->getMass() << std::endl;
+	std::cout << "Pixels Per Meter: " << m_pLootbox->getPixelsPerMeter() << std::endl;
+	m_Angle = glm::degrees(m_Angle);
+	std::cout << "Angle: " << m_pLootbox->getAngle() << std::endl;
+	std::cout << "Angle in degrees: " << m_Angle << std::endl;
+
+
+	//// ship sprite for testing purposes
+	//m_pEnemy = new Enemy();
+	//m_pEnemy->getTransform->position = glm::vec2(700.f, m_pPlayer->getTransform()->position.y);
+	//addChild(m_pEnemy);
 
 	/* Instructions Label */
 	m_pInstructionsLabel = new Label("Press the backtick (`) character to toggle Debug View", "Consolas", 20, white);
@@ -175,13 +186,27 @@ void PlayScene::start()
 	addChild(m_PPMdisplay);
 }
 
+float PlayScene::calculateAngle(float x, float y)
+{
+	// arctan(ramp rise/ramp run)
+	return atan(y/x); 
+}
+
+float PlayScene::calculateHeight(float angle, float x)
+{
+	// height = run * tan(angle)
+	return x * tan(glm::radians(angle));
+}
+
 // Reset Values
 void PlayScene::resetValues()
 {
+	xRamp = 400.0f;
+	yRamp = 200.0f;
 	m_gravityFactor = 9.8f;
 	m_PPM = 5.0f;
-	m_Angle = 0.0f;
-	m_velocity = 0.0f;
+	m_Angle = calculateAngle(xRamp,yRamp);
+	mass = 10.0f;
 }
 
 void PlayScene::GUI_Function()
@@ -195,53 +220,44 @@ void PlayScene::GUI_Function()
 	ImGui::Begin("Physics Controls", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
 	// The Throw Function
-	if(ImGui::Button("Throw"))
+	if(ImGui::Button("Activate Physics"))
 	{
-		isMoving = (isMoving) ? false : true;
-		m_pBall->setIsThrown(isMoving);
-		std::cout << "Is moving: " << isMoving << std::endl;
+		isEnabled = (isEnabled) ? false : true;
+		std::cout << "Is moving: " << isEnabled << std::endl;
+		m_pLootbox->setIsEnabled(isEnabled);
 	}
 
 	// Resets the position of the ball as well as the elapsed time so that the acceleration resets
 	ImGui::SameLine();
-	if (ImGui::Button("Reset Ball Position"))
-	{
-		// resets position of ball
-		m_pBall->getTransform()->position = m_pPlayer->getTransform()->position;
-		m_pBall->getTransform()->position.x += m_pBall->getWidth();
-		isMoving = false; // Makes sure that throw is reset
-		m_pBall->resetElapsedTime(); // reset the elapsed time for acceleration purposes
-		m_pBall->setIsThrown(isMoving); // send boolean to ball class
-	}
-
-	ImGui::Separator();
-
-	// Gravity Toggle, If user triggers Throw, ball should just move in a straight line
-	static bool isGravityEnabled = false;
-	if (ImGui::Checkbox("Gravity Enabled", &isGravityEnabled)) // toggling gravity with a checkbox
-	{
-		m_pBall->setIsGravityEnabled(isGravityEnabled);
-	}
-
-	ImGui::SameLine();
+	//if (ImGui::Button("Reset Ball Position"))
+	//{
+	//	// resets position of ball
+	//	m_pBall->getTransform()->position = m_pPlayer->getTransform()->position;
+	//	m_pBall->getTransform()->position.x += m_pBall->getWidth();
+	//	isEnabled = false; // Makes sure that throw is reset
+	//	m_pBall->resetElapsedTime(); // reset the elapsed time for acceleration purposes
+	//	m_pBall->setIsThrown(isEnabled); // send boolean to ball class
+	//}
 
 	// Resetting values for elements on screen
 	if (ImGui::Button("Reset All"))
 	{
-		isGravityEnabled = false;
-		isMoving = false;
-		m_pBall->setIsGravityEnabled(isGravityEnabled);
+		isEnabled = false;
 		resetValues();
 
 		// resetting position values
-		m_pPlayer->getTransform()->position = glm::vec2(100.0f, 400.0f);
-		m_pBall->getTransform()->position = m_pPlayer->getTransform()->position;
-		m_pBall->getTransform()->position.x += m_pBall->getWidth();
-		m_pBall->setGravityFactor(m_gravityFactor);
-		m_pBall->setPixelsPerMeter(m_PPM);
-		m_pBall->setAngle(m_Angle);
-		m_pBall->setInitialPosition(m_pBall->getTransform()->position);
-		m_pBall->resetElapsedTime();
+		m_pLootbox->setIsEnabled(isEnabled);
+		m_pLootbox->getTransform()->position = glm::vec2(150.0f, 400 - yRamp);		
+		m_pLootbox->setGravityFactor(m_gravityFactor);
+		m_pLootbox->setPixelsPerMeter(m_PPM);
+		m_pLootbox->setVelocity(glm::vec2(0.0f, 0.0f));
+		m_pLootbox->setAngle(m_Angle);
+		m_pLootbox->setMass(mass);
+		std::cout << "Gravity Factor: " << m_pLootbox->getGravityFactor() << std::endl;
+		std::cout << "Pixels Per Meter: " << m_pLootbox->getPixelsPerMeter() << std::endl;
+		std::cout << "Angle: " << m_pLootbox->getAngle() << std::endl;
+		std::cout << "Mass: " << m_pLootbox->getMass() << std::endl;
+
 	}
 
 	// ----------------------- PARAMETER CHANGES -----------------------
@@ -249,45 +265,60 @@ void PlayScene::GUI_Function()
 	// Pixels per meter scale
 	if (ImGui::SliderFloat("Pixels Per Meter", &m_PPM, 0.1f, 30.0f, "%.1f"))
 	{
-		m_pBall->setPixelsPerMeter(m_PPM);
-		std::cout << "Pixels Per Meter: " << m_pBall->getPixelsPerMeter() << std::endl;
+		m_pLootbox->setPixelsPerMeter(m_PPM);
+		std::cout << "Pixels Per Meter: " << m_pLootbox->getPixelsPerMeter() << std::endl;
 	}
 	
+	if (ImGui::SliderFloat("Mass", &mass, 0.1f, 50.0f))
+	{
+		m_pLootbox->setMass(mass);
+		std::cout << "Mass: " << m_pLootbox->getMass() << std::endl;
+	}
+
+
 	// Modifiable Gravity Coefficient
 	if (ImGui::SliderFloat("Gravity", &m_gravityFactor, 0.1f, 30.0f, "%.1f"))
 	{
-		m_pBall->setGravityFactor(m_gravityFactor);
-		std::cout << "Gravity Factor: " << m_pBall->getGravityFactor() << std::endl;
-	}
-
-	// Angle for the ball to be kicked at
-	if (ImGui::SliderFloat("Launch Angle", &m_Angle, 0.0f, 90.0f, "%.1f"))
-	{
-		m_pBall->setAngle(m_Angle);
-		std::cout << "Angle value: " << m_pBall->getAngle() << std::endl;
-	}
-
-	// Change for high angle and low angle launch
-	if (ImGui::Button("Switch Angle"))
-	{
-		m_Angle = 90 - m_Angle;
-		m_pBall->setAngle(m_Angle);
-		std::cout << "Angle value: " << m_pBall->getAngle() << std::endl;
-	}
-	
-	// Velocity for the ball to be kicked
-	if (ImGui::SliderFloat("Initial Velocity: ", &m_velocity, 0.0f, 75.0f))
-	{
-		m_pBall->setVelocity(m_velocity);
-		std::cout << "Initial Velocity: " << m_pBall->getVelocity() << std::endl;
+		m_pLootbox->setGravityFactor(m_gravityFactor);
+		std::cout << "Gravity Factor: " << m_pLootbox->getGravityFactor() << std::endl;
 	}
 
 	// Lab purposes
 	if (ImGui::SliderFloat("Ramp Length", &xRamp, 0, 800)) {
+		m_Angle = calculateAngle(xRamp, yRamp);
+		m_pLootbox->setAngle(m_Angle); // sending the value in radians
+
+		m_Angle = glm::degrees(m_Angle); // this makes sure that the imgui slider is ok
+		std::cout << "Player Transform: " << m_pLootbox->getTransform()->position.y << std::endl;
+		std::cout << "Angle: " << m_pLootbox->getAngle() << std::endl;
 	}
 
 	if (ImGui::SliderFloat("Ramp Height", &yRamp, 0, 600)) {
+		if (!isEnabled)
+			m_pLootbox->getTransform()->position.y = 400.0f - yRamp;
+
+		m_Angle = calculateAngle(xRamp, yRamp);
+		m_pLootbox->setAngle(m_Angle); // sending the value in radians
+
+		m_Angle = glm::degrees(m_Angle); // this makes sure that the imgui slider is ok
+		std::cout << "Player Transform: " << m_pLootbox->getTransform()->position.y << std::endl;
+		std::cout << "Angle: " << m_pLootbox->getAngle() << std::endl;
+
 	}
+
+	if (ImGui::SliderFloat("Angle", &m_Angle, 0.0f, 89.0f))
+	{
+		m_pLootbox->setAngle(glm::radians(m_Angle));
+		yRamp = calculateHeight(m_Angle, xRamp);
+
+		if (!isEnabled)
+			m_pLootbox->getTransform()->position.y = 400.0f - yRamp;
+
+
+		std::cout << "Angle: " << m_pLootbox->getAngle() << std::endl;
+		std::cout << "Height: " << yRamp << std::endl;
+
+	}	
 	
 	ImGui::Separator();
 
@@ -311,22 +342,6 @@ void PlayScene::GUI_Function()
 			m_pEnemy->getTransform()->position.x = m_pBall->getTransform()->position.x;
 		}
 	}
-
-	// Slider for Enemy Position
-	if (ImGui::SliderInt("Enemy Position X", &xEnemyPos, 0, 800)) {
-		m_pEnemy->getTransform()->position.x = xEnemyPos;
-
-		// Checking so that the enemy does not pass the bomb
-		if (m_pBall->getTransform()->position.x >= xEnemyPos)
-		{
-			xEnemyPos = m_pBall->getTransform()->position.x;
-			m_pEnemy->getTransform()->position.x = m_pBall->getTransform()->position.x;
-		}
-	}
-
-	
-	
-
 
 	ImGui::End();
 	ImGui::EndFrame();
