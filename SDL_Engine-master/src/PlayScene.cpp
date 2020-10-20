@@ -253,6 +253,7 @@ void PlayScene::GUI_Function()
 		m_pLootbox->setVelocity(glm::vec2(0.0f, 0.0f));
 		m_pLootbox->setAngle(m_Angle);
 		m_pLootbox->setMass(mass);
+		m_Angle = glm::degrees(m_Angle);
 		std::cout << "Gravity Factor: " << m_pLootbox->getGravityFactor() << std::endl;
 		std::cout << "Pixels Per Meter: " << m_pLootbox->getPixelsPerMeter() << std::endl;
 		std::cout << "Angle: " << m_pLootbox->getAngle() << std::endl;
