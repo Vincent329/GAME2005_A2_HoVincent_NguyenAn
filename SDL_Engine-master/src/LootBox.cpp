@@ -37,8 +37,8 @@ void LootBox::clean()
 
 void LootBox::m_move()
 {
-	std::cout << "Calling Move" << std::endl;
-	std::cout << "Enabled working? " << m_isEnabled << std::endl;
+	/*std::cout << "Calling Move" << std::endl;
+	std::cout << "Enabled working? " << m_isEnabled << std::endl;*/
 	if (!m_isEnabled)
 	{	
 		
@@ -46,43 +46,80 @@ void LootBox::m_move()
 		getRigidBody()->velocity = glm::vec2(0.0f, 0.0f) * m_PPM;
 		getRigidBody()->acceleration = glm::vec2(0.0f, 0.0F) * m_PPM;
 
-		std::cout << "velocity X: " << getRigidBody()->velocity.x << std::endl;
-		std::cout << "velocity Y: " << getRigidBody()->velocity.y << std::endl;
+		//std::cout << "velocity X: " << getRigidBody()->velocity.x << std::endl;
+		//std::cout << "velocity Y: " << getRigidBody()->velocity.y << std::endl;
 
-		std::cout << "Acceleration X: " << getRigidBody()->acceleration.x << std::endl;
-		std::cout << "Acceleration Y: " << getRigidBody()->acceleration.y << std::endl;
+		//std::cout << "Acceleration X: " << getRigidBody()->acceleration.x << std::endl;
+		//std::cout << "Acceleration Y: " << getRigidBody()->acceleration.y << std::endl;
 	}
 	else {
-		// implement formulas here
-		
-		// the ramp will have a frictionless surface
+		if (getTransform()->position.y < 400.0f - (getHeight() / 2.0)) {
+			// implement formulas here
 
-		// So the formula needed here for acceleration will be
-		// a = g * sin(theta)
-		acceleration = m_gravityFactor * sin(m_Angle);
-		m_acceleration = glm::vec2(acceleration * cos(m_Angle), acceleration * sin(m_Angle));
-		getRigidBody()->acceleration = m_acceleration;
+			// the ramp will have a frictionless surface
 
-		std::cout << "Acceleration X: " << getRigidBody()->acceleration.x << std::endl;
-		std::cout << "Acceleration Y: " << getRigidBody()->acceleration.y << std::endl;
+			// So the formula needed here for acceleration will be
+			// a = g * sin(theta)
+			acceleration = m_gravityFactor * sin(m_Angle);
+			m_acceleration = glm::vec2(acceleration * cos(m_Angle), acceleration * sin(m_Angle));
+			getRigidBody()->acceleration = m_acceleration;
 
-		// velocity += acceleration * deltaTime * m_PPM
-		getRigidBody()->velocity += getRigidBody()->acceleration * deltaTime * m_PPM;
-		
-		// Pf += velocity * dt (explanation)
-		getTransform()->position += getRigidBody()->velocity * deltaTime;
+			/*std::cout << "Acceleration X: " << getRigidBody()->acceleration.x << std::endl;
+			std::cout << "Acceleration Y: " << getRigidBody()->acceleration.y << std::endl;*/
 
-		// ---------- flat surface ------------
-		// if the ball reached a certain height
-		// could trigger on bool
-		// velocity will change from going down the ramp along a flat surface with friction
-		// accelaration wilw go the other way because the only net force will be the force of friction
-		// acceleration = - (mk) * m_gravityFactor;
-		// velocity += acceleration * deltaTime * m_PPM
+			// velocity += acceleration * deltaTime * m_PPM
+			getRigidBody()->velocity += getRigidBody()->acceleration * deltaTime * m_PPM;
 
-		// Pf += velocity * dt (explanation)
-		// getTransform()->position += getRigidbody()->velocity * deltaTime
+			// Pf += velocity * dt (explanation)
+			getTransform()->position += getRigidBody()->velocity * deltaTime;
 
+			// ---------- flat surface ------------
+			// if the ball reached a certain  say like 400 input value
+			// could trigger on bool
+			// velocity will change from going down the ramp along a flat surface with friction
+			// accelaration wilw go the other way because the only net force will be the force of friction
+			// acceleration = - (mk) * m_gravityFactor;
+			// velocity += acceleration * deltaTime * m_PPM
+
+			// Pf += velocity * dt (explanation)
+			// getTransform()->position += getRigidbody()->velocity * deltaTime
+		}
+		else if (getTransform()->position.y >= 400.0f - (getHeight() / 2.0))
+		{
+			if (!m_isStopped) {
+				getRigidBody()->velocity = glm::vec2(Util::magnitude(getRigidBody()->velocity), 0.0f);
+				acceleration = kineticFriction * m_gravityFactor;
+				m_acceleration = glm::vec2(-acceleration, 0.0f);
+
+				getRigidBody()->acceleration = m_acceleration;
+				std::cout << "position X: " << getTransform()->position.x << std::endl;
+				std::cout << "position Y: " << getTransform()->position.y << std::endl;
+
+				// velocity += acceleration * deltaTime * m_PPM
+				if (Util::magnitude(getRigidBody()->velocity) < Util::magnitude(getRigidBody()->acceleration) && Util::magnitude(getRigidBody()->velocity) > 0) {
+					m_isStopped = !m_isStopped;
+				}
+				std::cout << "Velocity magnitude: " << Util::magnitude(getRigidBody()->velocity) << std::endl;
+				std::cout << "Acceleration magnitude: " << Util::magnitude(getRigidBody()->acceleration) << std::endl;
+
+				glm::vec2 pos = getTransform()->position;
+				getRigidBody()->velocity += getRigidBody()->acceleration * deltaTime * m_PPM;
+
+				pos.x += getRigidBody()->velocity.x * deltaTime;
+				pos.y += getRigidBody()->velocity.y * deltaTime;
+				// Pf += velocity * dt 
+				getTransform()->position = pos;
+				finalPosition = getTransform()->position;
+			}
+			else
+			{
+				getRigidBody()->velocity = glm::vec2(0.0f, 0.0f);
+				getRigidBody()->acceleration = glm::vec2(0.0f, 0.0f);
+				getTransform()->position = finalPosition;
+				std::cout << "Velocity magnitude: " << Util::magnitude(getRigidBody()->velocity) << std::endl;
+				std::cout << "Acceleration magnitude: " << Util::magnitude(getRigidBody()->acceleration) << std::endl;
+			}
+		}
 		
 	}
 }
@@ -118,9 +155,24 @@ void LootBox::setPixelsPerMeter(float ppm)
 	m_PPM = ppm;
 }
 
+bool LootBox::getIsEnabled()
+{
+	return isEnabled();
+}
+
 void LootBox::setIsEnabled(bool check)
 {
 	m_isEnabled = check;
+}
+
+float LootBox::getKineticFriction()
+{
+	return kineticFriction;
+}
+
+void LootBox::setKineticFriction(float kFriction)
+{
+	kineticFriction = kFriction;
 }
 
 float LootBox::getAngle()
@@ -143,16 +195,16 @@ void LootBox::setVelocity(glm::vec2 velocity)
 	m_velocity = velocity;
 }
 
-
-glm::vec2 LootBox::getInitialPosition()
-{
-	return initialPosition;
-}
-
-void LootBox::setInitialPosition(glm::vec2 initPos)
-{
-	initialPosition = initPos;
-}
+//
+//glm::vec2 LootBox::getInitialPosition()
+//{
+//	return initialPosition;
+//}
+//
+//void LootBox::setInitialPosition(glm::vec2 initPos)
+//{
+//	initialPosition = initPos;
+//}
 
 void LootBox::resetElapsedTime()
 {
