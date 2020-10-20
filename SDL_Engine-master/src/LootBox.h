@@ -26,20 +26,24 @@ public:
 	float getMass();
 	void setMass(float mass);
 
+	// Change pixels per meter
 	float getPixelsPerMeter();
 	void setPixelsPerMeter(float ppm);
 
+	// Set the crate into motion
+	bool getIsEnabled();
 	void setIsEnabled(bool check);
+
+	// Kinetic Friction
+	float getKineticFriction();
+	void setKineticFriction(float kFriction);
+
+	// setting the angle
 	float getAngle();
 	void setAngle(float angle);
 
 	glm::vec2 getVelocity();
 	void setVelocity(glm::vec2 velocity);
-
-	// Initial Position
-	glm::vec2 getInitialPosition();
-	void setInitialPosition(glm::vec2 initPos);
-
 
 	// Resetting purposes
 	void resetElapsedTime();
@@ -53,7 +57,7 @@ private:
 	float m_PPM = 5.0f; // Pixels per meter scale
 	float m_Angle = 0.0f; // Launching 
 
-	glm::vec2 initialPosition;
+	glm::vec2 finalPosition;
 
 	// velocity values
 	glm::vec2 m_velocity = glm::vec2(0.0f, 0.0f);
@@ -63,9 +67,14 @@ private:
 	float acceleration = 0.0f; // use this to get a value and split it a
 	float m_Mass = 0.0f; // will determine the force going down wards, check the if statement if 
 					   // Fparallel = (mgsin(theta)) < F static friction  (muK * Force Normal)
+
+	float kineticFriction = 0.0f;
 	
 	// Trigger for the physics to work
 	bool m_isEnabled = false;
+
+	// once the ball goes into a stop
+	bool m_isStopped = false;
 	
 	// Timer variables for the elapsed time
 	float deltaTime = 1.0f / 30.0f;

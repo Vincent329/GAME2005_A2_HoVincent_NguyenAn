@@ -63,23 +63,18 @@ private:
 	float m_gravityFactor = 9.8f; // earth gravity, positive because going downwards is positive, can be modifiable
 	float m_PPM = 5.0f; // Pixels per meter scale
 
+	float m_kineticFriction = 0.42f;
+
 	float m_velocity = 0.0f; // initial velocity of the ball
 	float m_acceleration = 0.0f; //
 
 	float netForce = 0.0f;
-	glm::vec2 kineticFrictionForce; // the amount of friction acting upon the object as it is moving along the ramp
 
 	// set ramp params
-	float xRamp = 400.0f;
+	float xRamp = 200.0f;
 	float yRamp = 200.0f;
 	float m_Angle = 0.0f; // Angle of the ramp as designated by tan(theta) = opposite/adjacent (yRamp/xRamp)4
 					      // can also change to user specifics
-
-
-	// distance between bomb and the target
-	float deltaDistance = 0;
-	/*float m_velocityX = 0.0f;
-	float m_velocityY = 0.0f;*/
 
 	// timing variables
 	void resetValues();

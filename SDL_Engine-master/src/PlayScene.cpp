@@ -37,7 +37,7 @@ void PlayScene::draw()
 	Util::DrawLine(glm::vec2(50.0f, 555.0f), glm::vec2(50.0f + m_PPM, 555.0f), glm::vec4(1.0f));
 
 	// Draw the ramp FOR ASSIGNMENT 2
-	Util::DrawLine(glm::vec2(150.0f, 400.0f), glm::vec2(150.0f + xRamp, 400.0f), glm::vec4(1.0f));
+	Util::DrawLine(glm::vec2(150.0f, 400.0f), glm::vec2(150.0f + xRamp, 400.0f), glm::vec4(1.0f)); // flat line
 	Util::DrawLine(glm::vec2(150.0f, 400.0f), glm::vec2(150.0f, 400.0f - yRamp), glm::vec4(1.0f));
 	Util::DrawLine(glm::vec2(150.0f + xRamp, 400.0f), glm::vec2(150.0F, 400.0f - yRamp), glm::vec4(1.0f));
 
@@ -161,6 +161,7 @@ void PlayScene::start()
 	m_pLootbox->setAngle(m_Angle);
 	m_pLootbox->setGravityFactor(m_gravityFactor);
 	m_pLootbox->setPixelsPerMeter(m_PPM);
+	m_pLootbox->setKineticFriction(m_kineticFriction);
 	addChild(m_pLootbox);
 
 	std::cout << "Gravity Factor: " << m_pLootbox->getGravityFactor() << std::endl;
@@ -169,6 +170,8 @@ void PlayScene::start()
 	m_Angle = glm::degrees(m_Angle);
 	std::cout << "Angle: " << m_pLootbox->getAngle() << std::endl;
 	std::cout << "Angle in degrees: " << m_Angle << std::endl;
+	std::cout << "Frictional Coefficient" << m_pLootbox->getKineticFriction() << std::endl;
+
 
 
 	//// ship sprite for testing purposes
@@ -201,11 +204,12 @@ float PlayScene::calculateHeight(float angle, float x)
 // Reset Values
 void PlayScene::resetValues()
 {
-	xRamp = 400.0f;
+	xRamp = 200.0f;
 	yRamp = 200.0f;
 	m_gravityFactor = 9.8f;
 	m_PPM = 5.0f;
 	m_Angle = calculateAngle(xRamp,yRamp);
+	m_kineticFriction = 0.4;
 	mass = 10.0f;
 }
 
@@ -229,15 +233,6 @@ void PlayScene::GUI_Function()
 
 	// Resets the position of the ball as well as the elapsed time so that the acceleration resets
 	ImGui::SameLine();
-	//if (ImGui::Button("Reset Ball Position"))
-	//{
-	//	// resets position of ball
-	//	m_pBall->getTransform()->position = m_pPlayer->getTransform()->position;
-	//	m_pBall->getTransform()->position.x += m_pBall->getWidth();
-	//	isEnabled = false; // Makes sure that throw is reset
-	//	m_pBall->resetElapsedTime(); // reset the elapsed time for acceleration purposes
-	//	m_pBall->setIsThrown(isEnabled); // send boolean to ball class
-	//}
 
 	// Resetting values for elements on screen
 	if (ImGui::Button("Reset All"))
@@ -253,12 +248,15 @@ void PlayScene::GUI_Function()
 		m_pLootbox->setVelocity(glm::vec2(0.0f, 0.0f));
 		m_pLootbox->setAngle(m_Angle);
 		m_pLootbox->setMass(mass);
+		m_pLootbox->setKineticFriction(m_kineticFriction);
+		m_pLootbox->getTransform()->rotation = glm::vec2(cos(m_Angle), sin(m_Angle));
+
 		m_Angle = glm::degrees(m_Angle);
 		std::cout << "Gravity Factor: " << m_pLootbox->getGravityFactor() << std::endl;
 		std::cout << "Pixels Per Meter: " << m_pLootbox->getPixelsPerMeter() << std::endl;
 		std::cout << "Angle: " << m_pLootbox->getAngle() << std::endl;
 		std::cout << "Mass: " << m_pLootbox->getMass() << std::endl;
-
+		std::cout << "Frictional Coefficient" << m_pLootbox->getKineticFriction() << std::endl;
 	}
 
 	// ----------------------- PARAMETER CHANGES -----------------------
@@ -276,18 +274,24 @@ void PlayScene::GUI_Function()
 		std::cout << "Mass: " << m_pLootbox->getMass() << std::endl;
 	}
 
-
 	// Modifiable Gravity Coefficient
 	if (ImGui::SliderFloat("Gravity", &m_gravityFactor, 0.1f, 30.0f, "%.1f"))
 	{
 		m_pLootbox->setGravityFactor(m_gravityFactor);
 		std::cout << "Gravity Factor: " << m_pLootbox->getGravityFactor() << std::endl;
 	}
+	
+	if (ImGui::SliderFloat("Kinetic Friction", &m_kineticFriction, 0.1f, 2.0f))
+	{
+		m_pLootbox->setKineticFriction(m_kineticFriction);
+		std::cout << "Kinetic Friction: " << m_pLootbox->getKineticFriction() << std::endl;
+	}
 
 	// Lab purposes
 	if (ImGui::SliderFloat("Ramp Length", &xRamp, 0, 800)) {
 		m_Angle = calculateAngle(xRamp, yRamp);
 		m_pLootbox->setAngle(m_Angle); // sending the value in radians
+		m_pLootbox->getTransform()->rotation = glm::vec2(cos(m_Angle), sin(m_Angle));
 
 		m_Angle = glm::degrees(m_Angle); // this makes sure that the imgui slider is ok
 		std::cout << "Player Transform: " << m_pLootbox->getTransform()->position.y << std::endl;
@@ -300,6 +304,7 @@ void PlayScene::GUI_Function()
 
 		m_Angle = calculateAngle(xRamp, yRamp);
 		m_pLootbox->setAngle(m_Angle); // sending the value in radians
+		m_pLootbox->getTransform()->rotation = glm::vec2(cos(m_Angle), sin(m_Angle));
 
 		m_Angle = glm::degrees(m_Angle); // this makes sure that the imgui slider is ok
 		std::cout << "Player Transform: " << m_pLootbox->getTransform()->position.y << std::endl;
@@ -311,6 +316,7 @@ void PlayScene::GUI_Function()
 	{
 		m_pLootbox->setAngle(glm::radians(m_Angle));
 		yRamp = calculateHeight(m_Angle, xRamp);
+		m_pLootbox->getTransform()->rotation = glm::vec2(cos(m_Angle), sin(m_Angle));
 
 		if (!isEnabled)
 			m_pLootbox->getTransform()->position.y = 400.0f - yRamp;
@@ -326,23 +332,23 @@ void PlayScene::GUI_Function()
 	// display the player's position in with regards to the corresponding Pixels Per Meter
 	ImGui::Text("Player Distance in Meters: %f", m_pPlayer->getTransform()->position.x * m_PPM);
 	
-	// Position Slider for Player  
-	static int xPlayerPos = 100;
-	static int xEnemyPos = 700;
-	if (ImGui::SliderInt("Player Position X", &xPlayerPos, 0, 800)) {
-		m_pPlayer->getTransform()->position.x = xPlayerPos;
-			// Ball moves along with player
-		m_pBall->getTransform()->position = glm::vec2(xPlayerPos+m_pBall->getWidth(), 400);
-		m_pBall->setInitialPosition(m_pBall->getTransform()->position);
-		std::cout << "Initial Position = X: " << m_pBall->getTransform()->position.x << " Y: " << m_pBall->getTransform()->position.y << std::endl;
+	//// Position Slider for Player  
+	//static int xPlayerPos = 100;
+	//static int xEnemyPos = 700;
+	//if (ImGui::SliderInt("Player Position X", &xPlayerPos, 0, 800)) {
+	//	m_pPlayer->getTransform()->position.x = xPlayerPos;
+	//		// Ball moves along with player
+	//	m_pBall->getTransform()->position = glm::vec2(xPlayerPos+m_pBall->getWidth(), 400);
+	//	m_pBall->setInitialPosition(m_pBall->getTransform()->position);
+	//	std::cout << "Initial Position = X: " << m_pBall->getTransform()->position.x << " Y: " << m_pBall->getTransform()->position.y << std::endl;
 
-		// check so that the bomb does not pass the enemy position
-		if (m_pBall->getTransform()->position.x >= xEnemyPos)
-		{
-			xEnemyPos = m_pBall->getTransform()->position.x;
-			m_pEnemy->getTransform()->position.x = m_pBall->getTransform()->position.x;
-		}
-	}
+	//	// check so that the bomb does not pass the enemy position
+	//	if (m_pBall->getTransform()->position.x >= xEnemyPos)
+	//	{
+	//		xEnemyPos = m_pBall->getTransform()->position.x;
+	//		m_pEnemy->getTransform()->position.x = m_pBall->getTransform()->position.x;
+	//	}
+	//}
 
 	ImGui::End();
 	ImGui::EndFrame();
