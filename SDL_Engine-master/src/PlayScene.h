@@ -35,6 +35,10 @@ public:
 	float calculateAngle(float x, float y); // takes in xramp and yramp and gets angle through atan(x/y);
 	float calculateHeight(float angle, float x); // if player wants to change angle specifically, 
 											     // then call this function where y = x * tan(angle)
+	float calculateNormalForce(float m, float g, float angle);
+	float calculateFrictionForce(float m, float g, float mk);
+	float calculateAccelerationForce(float m, float g, float angle);
+	float calculateGravityForce(float m, float g);
 
 
 	// this will toggle the physics simulation
@@ -57,19 +61,26 @@ private:
 	// UI Items
 	Label* m_pInstructionsLabel;
 	Label* m_PPMdisplay;
+	Label* m_FnormalDisplay;
+	Label* m_FgravityDisplay;
+	Label* m_FaccelDisplay;
+	Label* m_FfrictionDisplay;
 
 	// Physics variables to pass into the Physics simulator
-	float mass = 0.0f;
+	float mass = 10.0f;
 	float m_gravityFactor = 9.8f; // earth gravity, positive because going downwards is positive, can be modifiable
 	float m_PPM = 5.0f; // Pixels per meter scale
-
 	float m_kineticFriction = 0.42f;
 
 	float m_velocity = 0.0f; // initial velocity of the ball
 	float m_acceleration = 0.0f; //
 
-	float netForce = 0.0f;
-
+	// for display purposes, must calculate
+	float gravityForce;
+	float frictionForce;
+	float accelerationForce;
+	float normalForce;
+	
 	// set ramp params
 	float xRamp = 200.0f;
 	float yRamp = 200.0f;
