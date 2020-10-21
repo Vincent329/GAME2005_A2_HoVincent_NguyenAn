@@ -2,7 +2,7 @@
 
 LootBox::LootBox()
 {
-	TextureManager::Instance()->load("../Assets/textures/megaman-idle-0.png", "lootbox");
+	TextureManager::Instance()->load("../Assets/textures/crate.png", "lootbox");
 
 	const auto size = TextureManager::Instance()->getTextureSize("lootbox");
 	setWidth(size.x);
@@ -24,7 +24,14 @@ void LootBox::draw()
 	const auto y = getTransform()->position.y;
 
 	// draw the target
-	TextureManager::Instance()->draw("lootbox", x, y, 0, 255, true);
+	if (getTransform()->position.y >= 400.0f - (getHeight() / 2.0))
+	{
+		TextureManager::Instance()->draw("lootbox", x, y, 0, 255, true);
+	}
+	else
+	{
+		TextureManager::Instance()->draw("lootbox", x, y, glm::degrees(m_Angle), 255, true);
+	}
 }
 
 void LootBox::update()
@@ -41,7 +48,6 @@ void LootBox::m_move()
 	std::cout << "Enabled working? " << m_isEnabled << std::endl;*/
 	if (!m_isEnabled)
 	{	
-		
 		// Make sure that the box doesn't move at all when you're going down
 		getRigidBody()->velocity = glm::vec2(0.0f, 0.0f) * m_PPM;
 		getRigidBody()->acceleration = glm::vec2(0.0f, 0.0F) * m_PPM;
@@ -165,6 +171,16 @@ void LootBox::setIsEnabled(bool check)
 	m_isEnabled = check;
 }
 
+bool LootBox::getIsStopped()
+{
+	return m_isStopped;
+}
+
+void LootBox::setIsStopped(bool check)
+{
+	m_isStopped = check;
+}
+
 float LootBox::getKineticFriction()
 {
 	return kineticFriction;
@@ -205,8 +221,3 @@ void LootBox::setVelocity(glm::vec2 velocity)
 //{
 //	initialPosition = initPos;
 //}
-
-void LootBox::resetElapsedTime()
-{
-	elapsedTime = 1.0f / 30.0f;
-}

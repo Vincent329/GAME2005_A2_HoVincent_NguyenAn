@@ -34,6 +34,10 @@ public:
 	bool getIsEnabled();
 	void setIsEnabled(bool check);
 
+		// Set the crate into motion
+	bool getIsStopped();
+	void setIsStopped(bool check);
+
 	// Kinetic Friction
 	float getKineticFriction();
 	void setKineticFriction(float kFriction);
@@ -44,9 +48,6 @@ public:
 
 	glm::vec2 getVelocity();
 	void setVelocity(glm::vec2 velocity);
-
-	// Resetting purposes
-	void resetElapsedTime();
 
 private:
 	// Variables for physics on the ball (passed in from PlayScene.cpp)
@@ -78,7 +79,6 @@ private:
 	
 	// Timer variables for the elapsed time
 	float deltaTime = 1.0f / 30.0f;
-	float elapsedTime = 1.0f / 30.0f;
 
 };
 

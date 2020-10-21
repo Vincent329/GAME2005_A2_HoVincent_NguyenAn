@@ -2,7 +2,7 @@
 #include "Game.h"
 #include "EventManager.h"
 #include "Util.h"
-
+\
 // required for IMGUI
 #include "imgui.h"
 #include "imgui_sdl.h"
@@ -41,7 +41,36 @@ void PlayScene::draw()
 	Util::DrawLine(glm::vec2(150.0f, 400.0f), glm::vec2(150.0f, 400.0f - yRamp), glm::vec4(1.0f));
 	Util::DrawLine(glm::vec2(150.0f + xRamp, 400.0f), glm::vec2(150.0F, 400.0f - yRamp), glm::vec4(1.0f));
 
+	// draw Vectors for force
+	gravityForce = calculateGravityForce(mass, m_gravityFactor);
+	frictionForce = calculateFrictionForce(mass, m_gravityFactor, m_kineticFriction);
+	accelerationForce = calculateAccelerationForce(mass, m_gravityFactor, m_Angle);
+	normalForce = calculateNormalForce(mass, m_gravityFactor, m_Angle);
 
+	Util::DrawLine(m_pLootbox->getTransform()->position, m_pLootbox->getTransform()->position + glm::vec2(0.0, gravityForce), glm::vec4(1.0f));
+	m_FgravityDisplay->setText("Fg: " + std::to_string(gravityForce));
+	m_FgravityDisplay->getTransform()->position = m_pLootbox->getTransform()->position + glm::vec2(0.0, gravityForce);
+
+	if (m_pLootbox->getTransform()->position.y < 400 - (m_pLootbox->getHeight() / 2.0f)) {
+		Util::DrawLine(m_pLootbox->getTransform()->position, m_pLootbox->getTransform()->position - glm::vec2(normalForce * cos(glm::radians(m_Angle + 90)), normalForce * sin(glm::radians(m_Angle + 90))), glm::vec4(1.0f));
+		Util::DrawLine(m_pLootbox->getTransform()->position, m_pLootbox->getTransform()->position + glm::vec2(accelerationForce * cos(glm::radians(m_Angle)), accelerationForce * sin(glm::radians(m_Angle))), glm::vec4(1.0f));
+		m_FnormalDisplay->setText("FN = " + std::to_string(normalForce));
+		m_FnormalDisplay->getTransform()->position = m_pLootbox->getTransform()->position - glm::vec2(normalForce * cos(glm::radians(m_Angle + 90)), normalForce * sin(glm::radians(m_Angle + 90)) + 1.0f);
+		m_FaccelDisplay->setText("Fa = " + std::to_string(accelerationForce));
+		m_FaccelDisplay->getTransform()->position = m_pLootbox->getTransform()->position + glm::vec2(accelerationForce * cos(glm::radians(m_Angle)), accelerationForce * sin(glm::radians(m_Angle)));
+		m_FfrictionDisplay->setText(" ");
+	}
+	else if (m_pLootbox->getTransform()->position.y >= 400 - (m_pLootbox->getHeight() / 2.0f))
+	{
+		normalForce = calculateNormalForce(mass, m_gravityFactor, 0.0f);
+		Util::DrawLine(m_pLootbox->getTransform()->position, m_pLootbox->getTransform()->position - glm::vec2(0.0f, normalForce), glm::vec4(1.0f));
+		Util::DrawLine(m_pLootbox->getTransform()->position, m_pLootbox->getTransform()->position - glm::vec2(frictionForce, 0.0f), glm::vec4(1.0f));
+		m_FnormalDisplay->setText("FN = " + std::to_string(normalForce));
+		m_FnormalDisplay->getTransform()->position = m_pLootbox->getTransform()->position - glm::vec2(0.0f, normalForce);
+		m_FfrictionDisplay->setText("Fk = " + std::to_string(frictionForce));
+		m_FfrictionDisplay->getTransform()->position = m_pLootbox->getTransform()->position - glm::vec2(frictionForce, 0.0f);
+		m_FaccelDisplay->setText(" ");
+	}
 	SDL_SetRenderDrawColor(Renderer::Instance()->getRenderer(), 255, 255, 255, 255);
 }
 
@@ -155,15 +184,14 @@ void PlayScene::start()
 	// Box Sprite
 	m_pLootbox = new LootBox();
 	m_pLootbox->getTransform()->position = glm::vec2(150.0f, yRamp);
-	m_pLootbox->getTransform()->rotation = glm::vec2(0.0f, 90.0f);
-
-	m_Angle = calculateAngle(xRamp, yRamp);
+	m_Angle = calculateAngle(xRamp, yRamp); // returns in radians first
 	m_pLootbox->setAngle(m_Angle);
+	m_pLootbox->getTransform()->position += glm::vec2(m_pLootbox->getWidth() / 2.0f * cos(m_Angle), -(m_pLootbox->getHeight() / 2.0f));
 	m_pLootbox->setGravityFactor(m_gravityFactor);
 	m_pLootbox->setPixelsPerMeter(m_PPM);
 	m_pLootbox->setKineticFriction(m_kineticFriction);
 	addChild(m_pLootbox);
-
+	
 	std::cout << "Gravity Factor: " << m_pLootbox->getGravityFactor() << std::endl;
 	std::cout << "Mass: " << m_pLootbox->getMass() << std::endl;
 	std::cout << "Pixels Per Meter: " << m_pLootbox->getPixelsPerMeter() << std::endl;
@@ -171,13 +199,6 @@ void PlayScene::start()
 	std::cout << "Angle: " << m_pLootbox->getAngle() << std::endl;
 	std::cout << "Angle in degrees: " << m_Angle << std::endl;
 	std::cout << "Frictional Coefficient" << m_pLootbox->getKineticFriction() << std::endl;
-
-
-
-	//// ship sprite for testing purposes
-	//m_pEnemy = new Enemy();
-	//m_pEnemy->getTransform->position = glm::vec2(700.f, m_pPlayer->getTransform()->position.y);
-	//addChild(m_pEnemy);
 
 	/* Instructions Label */
 	m_pInstructionsLabel = new Label("Press the backtick (`) character to toggle Debug View", "Consolas", 20, white);
@@ -187,6 +208,18 @@ void PlayScene::start()
 	// Pixels Per Meter Label
 	m_PPMdisplay = new Label("PPM: " + std::to_string(m_PPM), "Consolas", 10, white, glm::vec2(50.0f, 540.0f));
 	addChild(m_PPMdisplay);
+
+	m_FnormalDisplay = new Label(" ", "Consolas", 15, white, m_pLootbox->getTransform()->position);
+	addChild(m_FnormalDisplay);
+
+	m_FgravityDisplay = new Label(" ", "Consolas", 15, white, m_pLootbox->getTransform()->position);
+	addChild(m_FgravityDisplay);
+
+	m_FaccelDisplay = new Label(" ", "Consolas", 15, white, m_pLootbox->getTransform()->position);
+	addChild(m_FaccelDisplay);
+
+	m_FfrictionDisplay = new Label(" ", "Consolas", 15, white, m_pLootbox->getTransform()->position);
+	addChild(m_FfrictionDisplay);
 }
 
 float PlayScene::calculateAngle(float x, float y)
@@ -201,6 +234,29 @@ float PlayScene::calculateHeight(float angle, float x)
 	return x * tan(glm::radians(angle));
 }
 
+// Calculate the values of force for drawing the vectors
+float PlayScene::calculateNormalForce(float m, float g, float angle)
+{
+	// FN = mgcos(theta)
+	return m*g*cos(glm::radians(angle));
+}
+
+float PlayScene::calculateFrictionForce(float m, float g, float mk)
+{
+
+	return mk*m*g;
+}
+
+float PlayScene::calculateAccelerationForce(float m, float g, float angle)
+{
+	return m * g * sin(glm::radians(angle));
+}
+
+float PlayScene::calculateGravityForce(float m, float g)
+{
+	return m * g;
+}
+
 // Reset Values
 void PlayScene::resetValues()
 {
@@ -209,7 +265,7 @@ void PlayScene::resetValues()
 	m_gravityFactor = 9.8f;
 	m_PPM = 5.0f;
 	m_Angle = calculateAngle(xRamp,yRamp);
-	m_kineticFriction = 0.4;
+	m_kineticFriction = 0.42;
 	mass = 10.0f;
 }
 
@@ -242,14 +298,17 @@ void PlayScene::GUI_Function()
 
 		// resetting position values
 		m_pLootbox->setIsEnabled(isEnabled);
-		m_pLootbox->getTransform()->position = glm::vec2(150.0f, 400 - yRamp);		
+		m_pLootbox->getTransform()->position = glm::vec2(150.0f, 400 - yRamp);
+		m_pLootbox->setAngle(m_Angle);
+		m_pLootbox->getTransform()->position += glm::vec2(m_pLootbox->getWidth()/2.0f * cos(m_Angle), -(m_pLootbox->getHeight() / 2.0f));
 		m_pLootbox->setGravityFactor(m_gravityFactor);
 		m_pLootbox->setPixelsPerMeter(m_PPM);
 		m_pLootbox->setVelocity(glm::vec2(0.0f, 0.0f));
-		m_pLootbox->setAngle(m_Angle);
+		
 		m_pLootbox->setMass(mass);
 		m_pLootbox->setKineticFriction(m_kineticFriction);
 		m_pLootbox->getTransform()->rotation = glm::vec2(cos(m_Angle), sin(m_Angle));
+		m_pLootbox->setIsStopped(false);
 
 		m_Angle = glm::degrees(m_Angle);
 		std::cout << "Gravity Factor: " << m_pLootbox->getGravityFactor() << std::endl;
@@ -289,9 +348,14 @@ void PlayScene::GUI_Function()
 
 	// Lab purposes
 	if (ImGui::SliderFloat("Ramp Length", &xRamp, 0, 800)) {
-		m_Angle = calculateAngle(xRamp, yRamp);
-		m_pLootbox->setAngle(m_Angle); // sending the value in radians
-		m_pLootbox->getTransform()->rotation = glm::vec2(cos(m_Angle), sin(m_Angle));
+		if (!isEnabled)
+		{
+			m_Angle = calculateAngle(xRamp, yRamp);
+			m_pLootbox->setAngle(m_Angle); // sending the value in radians
+			m_pLootbox->getTransform()->position.y = 400.0f - (yRamp);
+			m_pLootbox->getTransform()->position += glm::vec2(0.0f, -(m_pLootbox->getHeight() / 2.0f));
+
+		}
 
 		m_Angle = glm::degrees(m_Angle); // this makes sure that the imgui slider is ok
 		std::cout << "Player Transform: " << m_pLootbox->getTransform()->position.y << std::endl;
@@ -300,11 +364,14 @@ void PlayScene::GUI_Function()
 
 	if (ImGui::SliderFloat("Ramp Height", &yRamp, 0, 600)) {
 		if (!isEnabled)
-			m_pLootbox->getTransform()->position.y = 400.0f - yRamp;
+		{
+			m_Angle = calculateAngle(xRamp, yRamp);
+			m_pLootbox->setAngle(m_Angle); // sending the value in radians
+			m_pLootbox->getTransform()->position.y = 400.0f - (yRamp);
+			m_pLootbox->getTransform()->position += glm::vec2(0.0f, -(m_pLootbox->getHeight() / 2.0f));
 
-		m_Angle = calculateAngle(xRamp, yRamp);
-		m_pLootbox->setAngle(m_Angle); // sending the value in radians
-		m_pLootbox->getTransform()->rotation = glm::vec2(cos(m_Angle), sin(m_Angle));
+		}
+		
 
 		m_Angle = glm::degrees(m_Angle); // this makes sure that the imgui slider is ok
 		std::cout << "Player Transform: " << m_pLootbox->getTransform()->position.y << std::endl;
@@ -314,12 +381,15 @@ void PlayScene::GUI_Function()
 
 	if (ImGui::SliderFloat("Angle", &m_Angle, 0.0f, 89.0f))
 	{
-		m_pLootbox->setAngle(glm::radians(m_Angle));
-		yRamp = calculateHeight(m_Angle, xRamp);
-		m_pLootbox->getTransform()->rotation = glm::vec2(cos(m_Angle), sin(m_Angle));
 
 		if (!isEnabled)
-			m_pLootbox->getTransform()->position.y = 400.0f - yRamp;
+		{
+			m_pLootbox->setAngle(glm::radians(m_Angle));
+			yRamp = calculateHeight(m_Angle, xRamp);
+			m_pLootbox->getTransform()->position.y = 400.0f - (yRamp);
+			m_pLootbox->getTransform()->position += glm::vec2(0.0f, -(m_pLootbox->getHeight() / 2.0f));
+
+		}
 
 
 		std::cout << "Angle: " << m_pLootbox->getAngle() << std::endl;
