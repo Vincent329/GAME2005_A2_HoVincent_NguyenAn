@@ -247,17 +247,19 @@ float PlayScene::calculateNormalForce(float m, float g, float angle)
 
 float PlayScene::calculateFrictionForce(float m, float g, float mk)
 {
-
+	// Fk = mk * mass * gravity
 	return mk*m*g;
 }
 
 float PlayScene::calculateAccelerationForce(float m, float g, float angle)
 {
+	// Fa = mass * gravity * sin(theta)
 	return m * g * sin(glm::radians(angle));
 }
 
 float PlayScene::calculateGravityForce(float m, float g)
 {
+	// Fg = mass * gravity
 	return m * g;
 }
 
@@ -291,7 +293,6 @@ void PlayScene::GUI_Function()
 		m_pLootbox->setIsEnabled(isEnabled);
 	}
 
-	// Resets the position of the ball as well as the elapsed time so that the acceleration resets
 	ImGui::SameLine();
 
 	// Resetting values for elements on screen
@@ -306,9 +307,7 @@ void PlayScene::GUI_Function()
 		m_pLootbox->setAngle(m_Angle);
 		m_pLootbox->getTransform()->position += glm::vec2(m_pLootbox->getWidth()/2.0f * cos(m_Angle), -(m_pLootbox->getHeight() / 2.0f));
 		m_pLootbox->setGravityFactor(m_gravityFactor);
-		m_pLootbox->setPixelsPerMeter(m_PPM);
-		m_pLootbox->setVelocity(glm::vec2(0.0f, 0.0f));
-		
+		m_pLootbox->setPixelsPerMeter(m_PPM);		
 		m_pLootbox->setMass(mass);
 		m_pLootbox->setKineticFriction(m_kineticFriction);
 		m_pLootbox->getTransform()->rotation = glm::vec2(cos(m_Angle), sin(m_Angle));
@@ -395,35 +394,12 @@ void PlayScene::GUI_Function()
 
 		}
 
-
 		std::cout << "Angle: " << m_pLootbox->getAngle() << std::endl;
 		std::cout << "Height: " << yRamp << std::endl;
 
 	}	
 	
 	ImGui::Separator();
-
-	// display the player's position in with regards to the corresponding Pixels Per Meter
-	ImGui::Text("Player Distance in Meters: %f", m_pPlayer->getTransform()->position.x * m_PPM);
-	
-	//// Position Slider for Player  
-	//static int xPlayerPos = 100;
-	//static int xEnemyPos = 700;
-	//if (ImGui::SliderInt("Player Position X", &xPlayerPos, 0, 800)) {
-	//	m_pPlayer->getTransform()->position.x = xPlayerPos;
-	//		// Ball moves along with player
-	//	m_pBall->getTransform()->position = glm::vec2(xPlayerPos+m_pBall->getWidth(), 400);
-	//	m_pBall->setInitialPosition(m_pBall->getTransform()->position);
-	//	std::cout << "Initial Position = X: " << m_pBall->getTransform()->position.x << " Y: " << m_pBall->getTransform()->position.y << std::endl;
-
-	//	// check so that the bomb does not pass the enemy position
-	//	if (m_pBall->getTransform()->position.x >= xEnemyPos)
-	//	{
-	//		xEnemyPos = m_pBall->getTransform()->position.x;
-	//		m_pEnemy->getTransform()->position.x = m_pBall->getTransform()->position.x;
-	//	}
-	//}
-
 	ImGui::End();
 	ImGui::EndFrame();
 

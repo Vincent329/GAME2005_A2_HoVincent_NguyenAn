@@ -46,20 +46,14 @@ public:
 	float getAngle();
 	void setAngle(float angle);
 
-	glm::vec2 getVelocity();
-	void setVelocity(glm::vec2 velocity);
-
 private:
-	// Variables for physics on the ball (passed in from PlayScene.cpp)
+	// Variables for physics on the crate (passed in from PlayScene.cpp)
 
 	float m_gravityFactor = 9.8f; // Gravity Factor
 	float m_PPM = 5.0f; // Pixels per meter scale
 	float m_Angle = 0.0f; // Launching 
 
 	glm::vec2 finalPosition;
-
-	// velocity values
-	glm::vec2 m_velocity = glm::vec2(0.0f, 0.0f);
 
 	// acceleration values
 	glm::vec2 m_acceleration = glm::vec2(0.0f, 0.0f); // afecteed by the value of g*sin(theta)
@@ -70,10 +64,11 @@ private:
 	// Coefficient of Kinetic Friction
 	float kineticFriction = 0.0f; 
 	
+	// bool triggers for events
 	// Trigger for the physics to work
 	bool m_isEnabled = false;
 
-	// once the ball goes into a stop
+	// once the crate goes into a stop
 	bool m_isStopped = false;
 	
 	// Timer variables for the elapsed time

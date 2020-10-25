@@ -55,7 +55,6 @@ private:
 	Enemy* m_pEnemy; // for testing purposes
 	Plane* m_pPlaneSprite;
 	Player* m_pPlayer;
-	Target* m_pBall;
 	bool m_playerFacingRight;
 
 	// UI Items

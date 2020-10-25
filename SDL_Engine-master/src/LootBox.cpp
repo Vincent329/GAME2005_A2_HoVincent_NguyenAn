@@ -72,10 +72,10 @@ void LootBox::m_move()
 			getTransform()->position += getRigidBody()->velocity * deltaTime;
 
 			// ---------- flat surface ------------
-			// if the ball reached a certain  say like 400 input value
+			// if the crate reached a certain  say like 400 input value
 			// could trigger on bool
 			// velocity will change from going down the ramp along a flat surface with friction
-			// accelaration wilw go the other way because the only net force will be the force of friction
+			// acceleration will go the other way because the only net force will be the force of friction
 			// acceleration = - (mk) * m_gravityFactor;
 			// velocity += acceleration * deltaTime * m_PPM
 
@@ -192,15 +192,6 @@ void LootBox::setAngle(float angle)
 	m_Angle = angle;
 }
 
-glm::vec2 LootBox::getVelocity()
-{
-	return m_velocity;
-}
-
-void LootBox::setVelocity(glm::vec2 velocity)
-{
-	m_velocity = velocity;
-}
 
 //
 //glm::vec2 LootBox::getInitialPosition()
