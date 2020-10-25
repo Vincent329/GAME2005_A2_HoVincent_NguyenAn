@@ -2,7 +2,7 @@
 #include "Game.h"
 #include "EventManager.h"
 #include "Util.h"
-\
+
 // required for IMGUI
 #include "imgui.h"
 #include "imgui_sdl.h"

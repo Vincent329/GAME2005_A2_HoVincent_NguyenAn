@@ -53,8 +53,6 @@ private:
 	// Variables for physics on the ball (passed in from PlayScene.cpp)
 
 	float m_gravityFactor = 9.8f; // Gravity Factor
-	glm::vec2 gravityVector = glm::vec2(0.0f, m_gravityFactor);
-
 	float m_PPM = 5.0f; // Pixels per meter scale
 	float m_Angle = 0.0f; // Launching 
 
@@ -69,7 +67,8 @@ private:
 	float m_Mass = 0.0f; // will determine the force going down wards, check the if statement if 
 					   // Fparallel = (mgsin(theta)) < F static friction  (muK * Force Normal)
 
-	float kineticFriction = 0.0f;
+	// Coefficient of Kinetic Friction
+	float kineticFriction = 0.0f; 
 	
 	// Trigger for the physics to work
 	bool m_isEnabled = false;

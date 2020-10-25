@@ -52,26 +52,18 @@ void LootBox::m_move()
 		getRigidBody()->velocity = glm::vec2(0.0f, 0.0f) * m_PPM;
 		getRigidBody()->acceleration = glm::vec2(0.0f, 0.0F) * m_PPM;
 
-		//std::cout << "velocity X: " << getRigidBody()->velocity.x << std::endl;
-		//std::cout << "velocity Y: " << getRigidBody()->velocity.y << std::endl;
 
-		//std::cout << "Acceleration X: " << getRigidBody()->acceleration.x << std::endl;
-		//std::cout << "Acceleration Y: " << getRigidBody()->acceleration.y << std::endl;
 	}
 	else {
 		if (getTransform()->position.y < 400.0f - (getHeight() / 2.0)) {
 			// implement formulas here
 
 			// the ramp will have a frictionless surface
-
 			// So the formula needed here for acceleration will be
 			// a = g * sin(theta)
 			acceleration = m_gravityFactor * sin(m_Angle);
 			m_acceleration = glm::vec2(acceleration * cos(m_Angle), acceleration * sin(m_Angle));
 			getRigidBody()->acceleration = m_acceleration;
-
-			/*std::cout << "Acceleration X: " << getRigidBody()->acceleration.x << std::endl;
-			std::cout << "Acceleration Y: " << getRigidBody()->acceleration.y << std::endl;*/
 
 			// velocity += acceleration * deltaTime * m_PPM
 			getRigidBody()->velocity += getRigidBody()->acceleration * deltaTime * m_PPM;
@@ -138,7 +130,6 @@ float LootBox::getGravityFactor()
 void LootBox::setGravityFactor(float gFactor)
 {
 	m_gravityFactor = gFactor;
-	gravityVector = glm::vec2(0.0f, m_gravityFactor);
 }
 
 float LootBox::getMass()

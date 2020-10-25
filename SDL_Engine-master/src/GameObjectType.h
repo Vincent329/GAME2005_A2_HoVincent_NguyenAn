@@ -5,6 +5,7 @@ enum GameObjectType {
 	NONE = -1,
 	ENEMY,
 	TARGET,
+	RETICLE,
 	LOOTBOX,
 	PLAYER,
 	PLANE,
