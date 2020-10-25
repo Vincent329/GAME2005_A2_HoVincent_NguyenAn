@@ -70,7 +70,7 @@ private:
 	float mass = 10.0f;
 	float m_gravityFactor = 9.8f; // earth gravity, positive because going downwards is positive, can be modifiable
 	float m_PPM = 5.0f; // Pixels per meter scale
-	float m_kineticFriction = 0.42f;
+	float m_kineticFriction = 0.7f;
 
 	float m_velocity = 0.0f; // initial velocity of the ball
 	float m_acceleration = 0.0f; //
