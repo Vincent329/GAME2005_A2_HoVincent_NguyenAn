@@ -47,29 +47,32 @@ void PlayScene::draw()
 	accelerationForce = calculateAccelerationForce(mass, m_gravityFactor, m_Angle);
 	normalForce = calculateNormalForce(mass, m_gravityFactor, m_Angle);
 
-	Util::DrawLine(m_pLootbox->getTransform()->position, m_pLootbox->getTransform()->position + glm::vec2(0.0, gravityForce), glm::vec4(1.0f));
 	m_FgravityDisplay->setText("Fg: " + std::to_string(gravityForce));
 	m_FgravityDisplay->getTransform()->position = m_pLootbox->getTransform()->position + glm::vec2(0.0, gravityForce);
+	Util::DrawLine(m_pLootbox->getTransform()->position, m_pLootbox->getTransform()->position + glm::vec2(0.0, gravityForce), glm::vec4(1.0f));
+	
 
 	if (m_pLootbox->getTransform()->position.y < 400 - (m_pLootbox->getHeight() / 2.0f)) {
-		Util::DrawLine(m_pLootbox->getTransform()->position, m_pLootbox->getTransform()->position - glm::vec2(normalForce * cos(glm::radians(m_Angle + 90)), normalForce * sin(glm::radians(m_Angle + 90))), glm::vec4(1.0f));
-		Util::DrawLine(m_pLootbox->getTransform()->position, m_pLootbox->getTransform()->position + glm::vec2(accelerationForce * cos(glm::radians(m_Angle)), accelerationForce * sin(glm::radians(m_Angle))), glm::vec4(1.0f));
 		m_FnormalDisplay->setText("FN = " + std::to_string(normalForce));
 		m_FnormalDisplay->getTransform()->position = m_pLootbox->getTransform()->position - glm::vec2(normalForce * cos(glm::radians(m_Angle + 90)), normalForce * sin(glm::radians(m_Angle + 90)) + 1.0f);
 		m_FaccelDisplay->setText("Fa = " + std::to_string(accelerationForce));
 		m_FaccelDisplay->getTransform()->position = m_pLootbox->getTransform()->position + glm::vec2(accelerationForce * cos(glm::radians(m_Angle)), accelerationForce * sin(glm::radians(m_Angle)));
 		m_FfrictionDisplay->setText(" ");
+		Util::DrawLine(m_pLootbox->getTransform()->position, m_pLootbox->getTransform()->position - glm::vec2(normalForce * cos(glm::radians(m_Angle + 90)), normalForce * sin(glm::radians(m_Angle + 90))), glm::vec4(1.0f));
+		Util::DrawLine(m_pLootbox->getTransform()->position, m_pLootbox->getTransform()->position + glm::vec2(accelerationForce * cos(glm::radians(m_Angle)), accelerationForce * sin(glm::radians(m_Angle))), glm::vec4(1.0f));
+		
 	}
 	else if (m_pLootbox->getTransform()->position.y >= 400 - (m_pLootbox->getHeight() / 2.0f))
 	{
 		normalForce = calculateNormalForce(mass, m_gravityFactor, 0.0f);
-		Util::DrawLine(m_pLootbox->getTransform()->position, m_pLootbox->getTransform()->position - glm::vec2(0.0f, normalForce), glm::vec4(1.0f));
-		Util::DrawLine(m_pLootbox->getTransform()->position, m_pLootbox->getTransform()->position - glm::vec2(frictionForce, 0.0f), glm::vec4(1.0f));
 		m_FnormalDisplay->setText("FN = " + std::to_string(normalForce));
 		m_FnormalDisplay->getTransform()->position = m_pLootbox->getTransform()->position - glm::vec2(0.0f, normalForce);
 		m_FfrictionDisplay->setText("Fk = " + std::to_string(frictionForce));
 		m_FfrictionDisplay->getTransform()->position = m_pLootbox->getTransform()->position - glm::vec2(frictionForce, 0.0f);
 		m_FaccelDisplay->setText(" ");
+		Util::DrawLine(m_pLootbox->getTransform()->position, m_pLootbox->getTransform()->position - glm::vec2(0.0f, normalForce), glm::vec4(1.0f));
+		Util::DrawLine(m_pLootbox->getTransform()->position, m_pLootbox->getTransform()->position - glm::vec2(frictionForce, 0.0f), glm::vec4(1.0f));
+		
 	}
 	SDL_SetRenderDrawColor(Renderer::Instance()->getRenderer(), 255, 255, 255, 255);
 }
@@ -171,6 +174,7 @@ void PlayScene::start()
 	// set the background
 	TextureManager::Instance()->load("../Assets/textures/Background.png", "background");
 	const SDL_Color white = { 255, 255, 255, 255 };
+	const SDL_Color blue = { 0, 0, 255, 255 };
 
 	// Set GUI Title
 	m_guiTitle = "Physics Simulator";	
@@ -265,7 +269,7 @@ void PlayScene::resetValues()
 	m_gravityFactor = 9.8f;
 	m_PPM = 5.0f;
 	m_Angle = calculateAngle(xRamp,yRamp);
-	m_kineticFriction = 0.42;
+	m_kineticFriction = 0.7;
 	mass = 10.0f;
 }
 
